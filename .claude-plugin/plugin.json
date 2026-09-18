@@ -1,0 +1,8 @@
+{
+  "name": "demo-video",
+  "version": "1.0.0",
+  "description": "Write a demo scenario, film it as a narrated screencast on macOS, and check the frames against the narration.",
+  "author": { "name": "artemmmon" },
+  "repository": "https://github.com/artemmmon/screencast-demo-maker",
+  "keywords": ["demo", "video", "screencast", "narration", "elevenlabs"]
+}

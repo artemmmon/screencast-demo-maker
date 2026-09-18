@@ -1,0 +1,26 @@
+{
+  "slug": "myapp-L02",
+  "projectRoot": "/absolute/path/to/project",
+  "output": "hw/L02/demo-L02.mp4",
+  "order": ["s1", "s2", "s3"],
+  "healthUrls": ["http://localhost:3000"],
+  "video": { "fps": 30, "zoom": 1.25, "display": "1920x1080" },
+  "tts": {
+    "voiceId": "",
+    "voiceName": "",
+    "model": "eleven_multilingual_v2",
+    "keychainService": "elevenlabs-api"
+  },
+  "vscode": {
+    "firstFile": "README.md",
+    "hide": ["**/node_modules", "dist"]
+  },
+  "terminal": {
+    "fontSize": 14,
+    "init": "export PATH=/opt/homebrew/opt/node@22/bin:$PATH; cd /absolute/path/to/project; clear"
+  },
+  "web": {
+    "baseUrl": "http://localhost:3000"
+  },
+  "neverClick": ["Delete", "Deploy", "Run"]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "demo-film-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Runtime deps for the demo-film skill scripts.",
+  "dependencies": { "playwright": "^1.49.0" }
+}

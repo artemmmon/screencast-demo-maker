@@ -1,12 +1,12 @@
 {
-  "name": "demo-video",
+  "name": "screencast-demo-maker",
   "owner": {
     "name": "artemmmon"
   },
   "description": "Narrated demo videos with Claude Code: scenario, filming, frame check.",
   "plugins": [
     {
-      "name": "demo-video",
+      "name": "screencast-demo-maker",
       "source": "./",
       "description": "Write a demo scenario, film it as a narrated screencast on macOS, and check the frames against the narration."
     }

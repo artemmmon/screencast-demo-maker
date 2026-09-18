@@ -38,7 +38,7 @@ clips are reused from the cache:
 node ${CLAUDE_SKILL_DIR}/scripts/stage-up.mjs <workDir>          # if the stage is not up
 node ${CLAUDE_SKILL_DIR}/scripts/director.mjs <workDir> --scenes=s6
 python3 ${CLAUDE_SKILL_DIR}/scripts/assemble.py <workDir> s6     # re-mixes s6, re-concats all
-${CLAUDE_SKILL_DIR}/scripts/sheet.sh <workDir> s6                # then hand to demo-video:frame-checker
+${CLAUDE_SKILL_DIR}/scripts/sheet.sh <workDir> s6                # then hand to screencast-demo-maker:frame-checker
 cp ~/.cache/demo-video/<slug>/out/<slug>.mp4 <projectRoot>/<config.output>
 ```
 
@@ -139,7 +139,7 @@ assembly mixes the wavs at those offsets, normalises loudness and concatenates i
 ${CLAUDE_SKILL_DIR}/scripts/sheet.sh <workDir> <scene>     # per scene
 ```
 
-Hand the sheets to the **`demo-video:frame-checker` subagent** with the expected content per
+Hand the sheets to the **`screencast-demo-maker:frame-checker` subagent** with the expected content per
 cue — do not read contact sheets in the main conversation, they are enormous.
 Also check the assembled file yourself:
 

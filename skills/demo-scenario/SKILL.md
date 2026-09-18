@@ -117,6 +117,6 @@ Tell the user: the two file paths, the estimated length (`chars / 14` seconds), 
 the reality check changed or could not verify.
 
 Then stop. **Filming is a separate, user-invoked step: the user types
-`/demo-video:demo-film` themselves.** That skill cannot be invoked by an agent, so do
+`/screencast-demo-maker:demo-film` themselves.** That skill cannot be invoked by an agent, so do
 not offer to continue into filming and do not start improvising it — say what the user has to type, and that it
 needs the app running, a spare display and an ElevenLabs key in the Keychain.

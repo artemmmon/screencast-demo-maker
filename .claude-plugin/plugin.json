@@ -1,5 +1,5 @@
 {
-  "name": "demo-video",
+  "name": "screencast-demo-maker",
   "version": "1.0.0",
   "description": "Write a demo scenario, film it as a narrated screencast on macOS, and check the frames against the narration.",
   "author": { "name": "artemmmon" },

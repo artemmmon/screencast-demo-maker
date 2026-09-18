@@ -1,22 +1,22 @@
-# demo-video — Claude Code plugin
+# screencast-demo-maker — Claude Code plugin
 
 Turns a feature or a homework into a narrated demo video, recorded on macOS.
 
 | Piece | Kind | Invoked as | Does |
 |---|---|---|---|
-| `demo-scenario` | skill | `/demo-video:demo-scenario`, or by the model | writes `scenario.md` + `cues.json`, checked against the running app |
-| `demo-film` | skill, user-only | `/demo-video:demo-film` | ElevenLabs narration → staged VS Code, Terminal, Chrome → ffmpeg recording → mp4 |
-| `frame-checker` | subagent | `demo-video:frame-checker` | reads contact sheets and reports, per cue, whether the screen matches the words |
+| `demo-scenario` | skill | `/screencast-demo-maker:demo-scenario`, or by the model | writes `scenario.md` + `cues.json`, checked against the running app |
+| `demo-film` | skill, user-only | `/screencast-demo-maker:demo-film` | ElevenLabs narration → staged VS Code, Terminal, Chrome → ffmpeg recording → mp4 |
+| `frame-checker` | subagent | `screencast-demo-maker:frame-checker` | reads contact sheets and reports, per cue, whether the screen matches the words |
 
 ## Install
 
 ```sh
 claude plugin marketplace add artemmmon/screencast-demo-maker
-claude plugin install demo-video@demo-video
+claude plugin install screencast-demo-maker@screencast-demo-maker
 ```
 
 Or from inside Claude Code: `/plugin marketplace add artemmmon/screencast-demo-maker`,
-then `/plugin install demo-video@demo-video`.
+then `/plugin install screencast-demo-maker@screencast-demo-maker`.
 
 ## Requirements
 

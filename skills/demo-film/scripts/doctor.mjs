@@ -70,8 +70,9 @@ export async function checkMachine(config = null, { fix = false } = {}) {
 
   if (config?.tts.provider === 'elevenlabs') {
     const key = quiet('security', ['find-generic-password', '-s', config.tts.keychainService, '-w']);
-    add(!!key, `ElevenLabs key in Keychain (${config.tts.keychainService})`,
-      `security add-generic-password -s ${config.tts.keychainService} -a "$USER" -U -w   (paste the key at the hidden prompt) — or set tts.provider to "say"`);
+    add(!!key, `your ElevenLabs key in Keychain (${config.tts.keychainService})`,
+      `create your own key at https://elevenlabs.io/app/settings/api-keys, then run in your terminal: ` +
+      `security add-generic-password -s ${config.tts.keychainService} -a "$USER" -U -w   (paste it at the hidden prompt) — or set tts.provider to "say"`);
   }
   if (config?.tts.provider === 'say') add(!!quiet('which', ['say']), 'macOS say', 'ships with macOS');
 

@@ -14,6 +14,7 @@ You are the director: the user picks the voice by ear, grants permissions and sa
 
 - `reference/files-and-config.md` — the four input files, every `config.json` key, the cache layout, script flags
 - `reference/scenes-api.md` — the engine API `scenes.mjs` is written against
+- `reference/elevenlabs-key.md` — each user's own key: how to check it and ask for it
 - `reference/gotchas.md` — read before debugging anything; it is all hard-won
 
 Start a new project from `templates/` (`scenes.example.mjs`, `config.example.json`).
@@ -22,6 +23,11 @@ example to copy from, the URLs to film and the controls never to click.
 
 ## Phase −1 — intake (every session, before anything touches the screen)
 
+0. **The user's own ElevenLabs key comes first.** If `config.tts.provider` is
+   `elevenlabs` (the default), check for the key and, if it is missing or rejected, ask
+   the user for it exactly as `reference/elevenlabs-key.md` says — their own account,
+   stored by them in their Keychain, never pasted into chat. Nothing else starts until the
+   key works or the user switches to `say`. A key from the project author is never used.
 1. Find the demo folder (`<workDir>`): the project's `*-demo` skill names it; otherwise ask.
    No `config.json` there → run the `demo-setup` skill first, then come back.
 2. Run the doctor; `--fix` installs Playwright, which a plugin update wipes:
@@ -33,8 +39,7 @@ example to copy from, the URLs to film and the controls never to click.
    - which scenes to film (all, or a re-take list);
    - the display: the doctor reports how many are connected; with one, say that the staged
      windows will cover their screen for the whole take;
-   - the voice, if `tts.voiceId` is empty (auditioned in phase 1) — and the provider, if
-     there is no ElevenLabs key: wait for the key, or switch to `say` for a draft;
+   - the voice, if `tts.voiceId` is empty (auditioned in phase 1);
    - anything the doctor marked ✗ that only they can fix (permissions, starting the app).
 
 ## Re-shooting one scene
@@ -99,8 +104,9 @@ node ${CLAUDE_SKILL_DIR}/scripts/stage-up.mjs <workDir>
 | `elevenlabs` (default) | an ElevenLabs voice id | an API key in the Keychain; free tier is 10k chars/month |
 | `say` | a macOS voice name (`Samantha`, `Lesya`) | nothing — free, offline, robotic; fine for drafts |
 
-For ElevenLabs, if the doctor reports no key, ask the user to run once (hidden input,
-never in chat): `security add-generic-password -s elevenlabs-api -a "$USER" -w`.
+The ElevenLabs key was settled in phase −1 (`reference/elevenlabs-key.md`). A committed
+`tts.voiceId` that fails on this user's account is a library voice they have not added:
+audition again.
 
 ```sh
 node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> voices

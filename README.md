@@ -17,8 +17,8 @@ against the narration before handing you the mp4.
 - **macOS** with Screen Recording and Automation permission for your terminal app
 - Node ≥ 22, `ffmpeg`, Xcode Command Line Tools (`swift`, `python3`), Google Chrome
 - VS Code — only if videos show the editor; Terminal.app — only if they show a terminal
-- A voice: an [ElevenLabs](https://elevenlabs.io) API key (free tier ≈ two 5-minute videos
-  a month), or nothing at all with the built-in macOS `say` voice
+- A voice: **your own** [ElevenLabs](https://elevenlabs.io) API key (free tier ≈ two
+  5-minute videos a month), or nothing at all with the built-in macOS `say` voice
 - Ideally a second display to film on; one display works, but you cannot use the Mac
   while it films
 
@@ -50,6 +50,22 @@ gets the plugin enabled, with no install step:
 ```
 
 `demo-setup` offers to add it for you.
+
+## Your own ElevenLabs key
+
+Everyone who films uses their own ElevenLabs account — keys are never shared, committed or
+pasted into chat. The skills check for it before doing anything else and walk you through it:
+
+1. Sign up at [elevenlabs.io](https://elevenlabs.io) (free plan is enough).
+2. [Create an API key](https://elevenlabs.io/app/settings/api-keys) with Text to Speech
+   and Voices (read) access.
+3. Store it in your macOS Keychain — run in your terminal, paste the key at the hidden prompt:
+   ```sh
+   security add-generic-password -s elevenlabs-api -a "$USER" -U -w
+   ```
+
+Details, rotation and voices across accounts:
+[`skills/demo-film/reference/elevenlabs-key.md`](skills/demo-film/reference/elevenlabs-key.md).
 
 ## Quick start
 

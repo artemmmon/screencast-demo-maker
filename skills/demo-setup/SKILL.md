@@ -15,6 +15,14 @@ skills can work in. Output:
 
 Scripts live in `${CLAUDE_SKILL_DIR}/../demo-film/scripts/`. Write nothing before step 3.
 
+## 0. Your own ElevenLabs key — before anything else
+
+Narration defaults to ElevenLabs, and every person films with **their own** key, stored in
+their own Keychain — never shared, committed or pasted into chat. Before step 1, check for
+it and, if it is missing, walk the user through getting one exactly as
+`../demo-film/reference/elevenlabs-key.md` says. Wait for "done" (or for the user to choose
+the free `say` voice instead) before continuing.
+
 ## 1. Look before asking
 
 Read, and do not ask about, whatever the project already answers:
@@ -38,7 +46,7 @@ option. Never guess an answer the user has not confirmed.
 | 3 | What appears on screen: browser, code editor (VS Code), terminal? | `surfaces` |
 | 4 | App URL(s) to film, and how the app is started | `web.baseUrl`, `healthUrls`, project skill |
 | 5 | Narration language and audience | `tts.language`, project skill |
-| 6 | Voice: ElevenLabs (natural, needs a free API key) or macOS `say` (free, robotic) | `tts.provider` |
+| 6 | Voice: ElevenLabs (natural, needs *your own* free API key — step 0) or macOS `say` (free, robotic) | `tts.provider` |
 | 7 | Displays: a spare monitor to film on, or only one screen? | `video.display` |
 | 8 | Controls that must never be clicked (delete, deploy, paid actions) — or may the video click mutating controls if a pre-roll restores the data? | `neverClick`, project skill |
 
@@ -53,7 +61,7 @@ node ${CLAUDE_SKILL_DIR}/../demo-film/scripts/doctor.mjs <demoDir> --fix
 `--fix` only installs Playwright into the plugin folder. Show the checklist as it
 printed. Every ✗ has an exact fix under it: run the ones that are plain commands only
 with the user's go-ahead; permissions and API keys are the user's to grant — give the
-command (the Keychain one takes the key at a hidden prompt, never in chat) and wait.
+command and wait. The key procedure is in `../demo-film/reference/elevenlabs-key.md`.
 
 ## 4. Write the files
 

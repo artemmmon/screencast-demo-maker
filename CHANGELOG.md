@@ -9,6 +9,8 @@ script flag; major — a `config.json` or `scenes.mjs` change that breaks existi
 ## 1.1.0 — 2026-09-22
 
 ### Added
+- Each user's own ElevenLabs key: `demo-setup` and `demo-film` check for it before any
+  other work and walk the user through creating and storing it (`reference/elevenlabs-key.md`).
 - `demo-setup` skill: asks what to film up front, runs the doctor, writes `config.json`
   and a `<project>-demo` project skill from a template, offers the team-install snippet.
 - `doctor.mjs`: one command that checks the Mac and a demo folder and prints the fix for

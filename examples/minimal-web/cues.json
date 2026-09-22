@@ -1,0 +1,6 @@
+[
+  { "id": "s1-01", "scene": "s1", "text": "This is Tiny Tasks, a one-page to-do list we use to try the plugin out." },
+  { "id": "s1-02", "scene": "s1", "text": "Two of the three tasks for today are already marked as done." },
+  { "id": "s2-01", "scene": "s2", "text": "The Details button opens a short summary under the list." },
+  { "id": "s2-02", "scene": "s2", "text": "It says the same thing the list shows: two of three done, filming is last." }
+]

@@ -1,0 +1,12 @@
+{
+  "slug": "example-minimal-web",
+  "projectRoot": ".",
+  "output": "out/minimal-web.mp4",
+  "order": ["s1", "s2"],
+  "surfaces": ["browser"],
+  "healthUrls": ["http://localhost:8765"],
+  "video": { "fps": 30, "zoom": 1.25 },
+  "tts": { "provider": "say", "voiceId": "Samantha", "language": "en_US", "charsPerSecond": 14 },
+  "web": { "baseUrl": "http://localhost:8765" },
+  "neverClick": []
+}

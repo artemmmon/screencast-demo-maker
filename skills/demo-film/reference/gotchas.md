@@ -56,7 +56,7 @@ Everything here cost time to discover. Read before debugging.
 - `"editor.smoothScrolling": true` makes `code -r -g file:line` look like a scroll
   rather than a cut. `"workbench.editor.showTabs": "single"` stops tabs piling up
   across a scene.
-- `files.exclude` hides noise folders from the explorer (`hw`, `temp`, clones).
+- `files.exclude` hides noise folders from the explorer (`vscode.hide`: build output, notes, vendored clones).
 - First launch shows welcome/AI dialogs; the template settings disable them, but
   launch once before filming anyway.
 

@@ -8,26 +8,26 @@
 ~5 min. Filmed by `demo-film` from `cues.json`; this file is the human view.
 
 ## Preconditions
-- stack up: web :3000, api :3001
-- data on screen: one repo, PR #1 with a finished review round
+- app up: web :3000 (`npm run dev`)
+- data on screen: one project with three open tasks, one of them overdue
 
 ## 1. Intro — 20 s
-**Show:** PR list.
-**Say (s1-01):** "DevDigest is a local AI pull-request reviewer. …"
+**Show:** the task board.
+**Say (s1-01):** "Taskly is a small team board. This video shows the new overdue filter. …"
 
-## 2. CLAUDE.md — 45 s
-**Show:** `CLAUDE.md` (Stack § line 7, Packages § 13, Commands § 24, Naming § 40, Do not touch § 64)
-**Do:** jump section to section.
-**Say (s2-01):** "Stack — language, frameworks …"
-**Say (s2-02):** "Packages — four packages …"
+## 2. Where the rule lives — 45 s
+**Show:** `src/filters/overdue.ts` (rule § line 12, tests § `overdue.test.ts` 8)
+**Do:** jump from the rule to its test.
+**Say (s2-01):** "The filter is one function: a task is overdue once its due date has passed …"
+**Say (s2-02):** "Its test pins the edge case — a task due today is not overdue yet."
 
 ## Coverage
 | Criterion | Scene | Cue |
 |---|---|---|
-| CLAUDE.md documents the stack | 2 | s2-01 |
+| overdue filter explained | 2 | s2-01 |
 
 ## Unverified claims
-- "the reviewer never calls the LLM here" — checked by watching network in scene 7 only.
+- "the filter runs on the server" — true, but no frame shows it.
 ```
 
 Line numbers next to **Show** are what `scenes.mjs` passes to `code.open(file, line)`,
@@ -42,7 +42,8 @@ The scene prefix is also the recorded clip name, so one scene can be re-shot alo
 
 ## Pacing
 
-- **Length**: 40–250 characters per cue, which at ~14 chars/second is 3–18 seconds.
+- **Length**: 40–250 characters per cue, which at ~14 chars/second (`tts.charsPerSecond`)
+  is 3–18 seconds.
   Longer and a single on-screen action has to be stretched to cover it. Shorter and it
   will not survive one `code.open`, which alone eats ~1.5 s.
 - **Budget**: narration total ≈ characters / 14 seconds. Video runs 10–20% longer
@@ -67,6 +68,8 @@ The scene prefix is also the recorded clip name, so one scene can be re-shot alo
 
 - Prefer the real UI over a file that describes the UI.
 - One claim per scene needs one visible proof.
-- Read-only: never plan a scene around clicking something that mutates state
-  (run, delete, accept, reject, deploy). Hovering to reveal a control is fine and
-  demonstrates it exists.
+- Read-only by default: never plan a scene around clicking something that mutates state
+  (run, delete, accept, reject, deploy) — hovering to reveal a control is fine and
+  demonstrates it exists. A video whose point *is* a mutation may click it only with the
+  user's yes, and only if the scene's pre-roll puts the data back, so a re-take starts clean.
+  `config.neverClick` is never clicked, whatever the video is about.

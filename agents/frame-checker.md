@@ -39,8 +39,8 @@ A compact table, then nothing else:
 | cue    | verdict | note |
 |--------|---------|------|
 | s2-01  | ok      | |
-| s7-03  | FAIL    | pills read 1/2/1, line says 1/2/2 |
-| s8-01  | suspect | COST tile visible but half cut off at the right edge |
+| s7-03  | FAIL    | badges read 1/2/1, line says 1/2/2 |
+| s8-01  | suspect | total tile visible but half cut off at the right edge |
 ```
 
 Rules for the report:

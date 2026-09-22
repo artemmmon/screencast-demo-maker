@@ -1,6 +1,6 @@
 ---
 name: demo-film
-description: Films a narrated demo/screencast video on macOS from a scenario produced by demo-scenario — generates ElevenLabs narration, stages an isolated VS Code, Terminal and Chrome on a spare display, records scene by scene with ffmpeg, assembles and verifies the result. Use only when the user explicitly asks to film, shoot, record or re-record a demo video, or invokes it by name.
+description: Films a narrated demo/screencast video on macOS from a scenario produced by demo-scenario — confirms the setup with the user, generates narration (ElevenLabs or macOS say), stages an isolated browser, VS Code and/or Terminal on the chosen display, records scene by scene with ffmpeg, assembles and verifies the result. Use only when the user explicitly asks to film, shoot, record or re-record a demo video, or invokes it by name.
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ You are the director: the user picks the voice by ear, grants permissions and sa
 "go". Never start recording without that word. Scripts live in
 `${CLAUDE_SKILL_DIR}/scripts/`; working files go to `~/.cache/demo-video/<slug>/`.
 
-- `reference/files-and-config.md` — the four input files, every `config.json` key, the cache layout
+- `reference/files-and-config.md` — the four input files, every `config.json` key, the cache layout, script flags
 - `reference/scenes-api.md` — the engine API `scenes.mjs` is written against
 - `reference/gotchas.md` — read before debugging anything; it is all hard-won
 
@@ -20,14 +20,22 @@ Start a new project from `templates/` (`scenes.example.mjs`, `config.example.jso
 If the project has its own demo skill (`*-demo`), read it first: it names a finished
 example to copy from, the URLs to film and the controls never to click.
 
-## Setup (once per install)
+## Phase −1 — intake (every session, before anything touches the screen)
 
-The scripts need Playwright. The plugin install does not fetch it, and an update of
-the plugin replaces this folder, so check before every session:
-
-```sh
-test -d ${CLAUDE_SKILL_DIR}/scripts/node_modules/playwright || npm install --prefix ${CLAUDE_SKILL_DIR}/scripts
-```
+1. Find the demo folder (`<workDir>`): the project's `*-demo` skill names it; otherwise ask.
+   No `config.json` there → run the `demo-setup` skill first, then come back.
+2. Run the doctor; `--fix` installs Playwright, which a plugin update wipes:
+   ```sh
+   node ${CLAUDE_SKILL_DIR}/scripts/doctor.mjs <workDir> --fix
+   ```
+3. Show the user the short plan and ask, **in one AskUserQuestion call**, anything that is
+   missing or that the doctor flagged — never fill it in yourself:
+   - which scenes to film (all, or a re-take list);
+   - the display: the doctor reports how many are connected; with one, say that the staged
+     windows will cover their screen for the whole take;
+   - the voice, if `tts.voiceId` is empty (auditioned in phase 1) — and the provider, if
+     there is no ElevenLabs key: wait for the key, or switch to `say` for a draft;
+   - anything the doctor marked ✗ that only they can fix (permissions, starting the app).
 
 ## Re-shooting one scene
 
@@ -52,10 +60,13 @@ director's job, not the script's. Run preflight again first if monitors changed.
   keystrokes — the sandbox blocks it and it is fragile anyway. The engine drives
   VS Code with `code -r -g`, Terminal with AppleScript `do script`, the browser
   with Playwright.
-- **Never click a mutating control** (`config.neverClick`): no running a review,
-  no accept/reject, no delete, no deploy. Hover to show that a control exists.
-- **The user's pointer is on camera.** It must be on another display before filming.
-- **Nothing is written into the project** except the final mp4.
+- **Never click `config.neverClick`**, and no other control that changes data unless the
+  project's `*-demo` skill allows it and the scene's pre-roll restores the state. Hover to
+  show that a control exists.
+- **The user's pointer is on camera.** It must be on another display before filming —
+  or, with a single display, parked in a corner the scenes never use.
+- **What lands in the project:** `scenes.mjs` and the chosen voice in `config.json` (both
+  in the demo folder), and the final mp4 at `config.output`. Everything else stays in the cache.
 
 ## Phase 0 — preflight
 
@@ -72,7 +83,8 @@ Show the user the checklist. If a permission is missing, open the right pane
 and wait — do not try to work around it. Display indexes change whenever a monitor is
 re-plugged, so preflight runs again after any change to the display setup.
 
-Then stage the windows:
+Then stage the windows. Only the apps in `config.surfaces` come up (`editor` → VS Code,
+`terminal` → Terminal.app); Chrome starts later, right before the first browser scene:
 
 ```sh
 node ${CLAUDE_SKILL_DIR}/scripts/stage-up.mjs <workDir>
@@ -80,26 +92,29 @@ node ${CLAUDE_SKILL_DIR}/scripts/stage-up.mjs <workDir>
 
 ## Phase 1 — narration
 
-The API key lives in the macOS Keychain. If `security find-generic-password -s
-elevenlabs-api -w` fails, ask the user to run once (hidden input, never in chat):
+`config.tts.provider` picks the engine:
+
+| Provider | Voice id | Needs |
+|---|---|---|
+| `elevenlabs` (default) | an ElevenLabs voice id | an API key in the Keychain; free tier is 10k chars/month |
+| `say` | a macOS voice name (`Samantha`, `Lesya`) | nothing — free, offline, robotic; fine for drafts |
+
+For ElevenLabs, if the doctor reports no key, ask the user to run once (hidden input,
+never in chat): `security add-generic-password -s elevenlabs-api -a "$USER" -w`.
 
 ```sh
-security add-generic-password -s elevenlabs-api -a "$USER" -w
+node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> voices
+node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> audition <cueId> <voice:label> [...]
+node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> all [cueId ...]
 ```
 
-```sh
-node ${CLAUDE_SKILL_DIR}/scripts/tts-el.mjs <workDir> voices
-node ${CLAUDE_SKILL_DIR}/scripts/tts-el.mjs <workDir> audition <cueId> <id:label> [...]
-node ${CLAUDE_SKILL_DIR}/scripts/tts-el.mjs <workDir> all [cueId ...]
-```
-
-If `config.tts.voiceId` is set, use it. Otherwise audition 3 voices on the cue with
-the most foreign-language terms, `open` the audition folder and ask the user to
-choose — you cannot judge a voice, so never pick one silently. Save the winner to
-`config.json`.
+If `config.tts.voiceId` is set, use it. Otherwise audition 3 voices that speak
+`config.tts.language` on the cue with the most foreign-language terms, `open` the
+audition folder and ask the user to choose — you cannot judge a voice, so never pick
+one silently. Save the winner to `config.json`.
 
 `all` trims silence, converts to 48 kHz wav and flags clips whose length is far from
-the text length; re-generate anything flagged. Budget: free tier is 10k chars/month.
+`chars / tts.charsPerSecond`; re-generate anything flagged.
 
 ## Phase 2 — scenes
 
@@ -118,7 +133,7 @@ scene asks for. Check those stills before filming for real.
 
 Tell the user, then stop and wait for "go":
 
-1. pointer off the filmed display (preflight re-checks this);
+1. pointer off the filmed display, or in an unused corner of the only one (preflight re-checks this);
 2. no typing while it runs — keyboard focus jumps to the staged windows;
 3. Do Not Disturb on, and hands off the filmed display.
 

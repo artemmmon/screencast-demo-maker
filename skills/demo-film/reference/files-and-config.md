@@ -2,41 +2,52 @@
 
 ## The four input files
 
-`demo-scenario` writes the first two; the other two are written during filming.
-
 | File | Written by | What it is |
 |---|---|---|
+| `config.json` | demo-setup (voice added by demo-film) | everything machine- and project-specific |
 | `scenario.md` | demo-scenario | the human view: scenes, what is shown, what is said |
 | `cues.json` | demo-scenario | a **bare JSON array** `[{ "id", "scene", "text" }]`, playback order |
 | `scenes.mjs` | demo-film, phase 2 | the code that drives the screen — see `scenes-api.md` |
-| `config.json` | demo-film, phase 0 | everything machine- and project-specific |
 
 ## `config.json`
 
+`scripts/config.mjs` validates it; `doctor.mjs <workDir>` prints every problem at once.
+
 ```jsonc
 {
-  "slug": "myapp-L01",             // names the cache dir: ~/.cache/demo-video/<slug>/
-  "projectRoot": "/abs/path",      // every file path in scenes.mjs is relative to this
-  "output": "hw/L01/demo-L01.mp4", // where the finished video is copied, relative to projectRoot
+  // --- required ---
+  "slug": "myapp-intro",           // names the cache dir ~/.cache/demo-video/<slug>/; ≤ 40 chars
+  "projectRoot": "../..",          // absolute, or relative to this folder; file paths in scenes.mjs are relative to it
+  "output": "demo/intro/intro.mp4",// where the finished video is copied, relative to projectRoot
   "order": ["s1", "s2", "…"],      // PLAYBACK order — what the concat step follows
-  "healthUrls": ["http://localhost:3000"],   // preflight pings these
-  "video": { "fps": 30, "zoom": 1.25, "display": "1920x1080" },
+
+  // --- optional (default) ---
+  "surfaces": ["browser", "editor", "terminal"],  // (all three) which apps are staged and checked
+  "healthUrls": ["http://localhost:3000"],        // ([]) preflight and doctor ping these
+  "video": { "fps": 30, "zoom": 1.25, "display": "1920x1080" },  // display: (first non-main screen)
   "tts": {
-    "voiceId": "…",                // ElevenLabs voice; empty means audition first
+    "provider": "elevenlabs",      // ("elevenlabs") or "say" — the free macOS voice
+    "voiceId": "…",                // ElevenLabs voice id, or a `say` voice name; empty = audition first
     "voiceName": "Eric",           // for humans only
+    "language": "en",              // narration language; filters `say` voices, guides the audition
     "model": "eleven_multilingual_v2",
-    "keychainService": "elevenlabs-api"      // `security find-generic-password -s <this> -w`
+    "keychainService": "elevenlabs-api",        // `security find-generic-password -s <this> -w`
+    "charsPerSecond": 14,          // (14) expected speaking rate: pacing budget and the <-- CHECK flag
+    "rate": 180,                   // `say` only: words per minute
+    "voiceSettings": {}            // ElevenLabs only: merged over stability 0.5, similarity 0.75
   },
-  "vscode": {
-    "firstFile": "CLAUDE.md",      // opened when the editor is staged
-    "hide": ["hw", "**/node_modules"]         // becomes files.exclude
+  "vscode": {                      // "editor" surface only
+    "firstFile": "README.md",      // (README.md) opened when the editor is staged
+    "hide": ["**/node_modules"],   // added to files.exclude
+    "settings": {}                 // merged over templates/vscode-settings.json
   },
-  "terminal": {
+  "codeBin": "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+  "terminal": {                    // "terminal" surface only
     "fontSize": 14,
-    "init": "export PATH=…; cd /abs/path; clear"   // runs once; the staged shell inherits nothing
+    "init": "…"                    // (PATH with the current node first; cd projectRoot; clear) — runs once
   },
   "web": { "baseUrl": "…" },       // free-form; scenes.mjs reads it as config.web
-  "neverClick": ["Run Review", "Delete"]        // documentation for whoever writes scenes.mjs
+  "neverClick": ["Delete"]         // ([]) never clicked by any scene, whatever the video is about
 }
 ```
 
@@ -63,3 +74,17 @@ Nothing here belongs in the repository; all of it is rebuildable.
 
 Keep the cache between sessions: re-shooting one scene is a minute's work only because
 the other scenes' clips are still here.
+
+## Script flags and environment
+
+| Script | Flags |
+|---|---|
+| `doctor.mjs [workDir]` | `--fix` installs Playwright into `scripts/` |
+| `preflight.mjs <workDir>` | `--display=WxH`, `--display-id=N` override `video.display` |
+| `stage-up.mjs <workDir>` | `--no-code`, `--no-term` skip an app for this run on top of `surfaces` |
+| `director.mjs <workDir>` | `--dry` (no recording, 1.2 s cues, stills), `--scenes=s4,s5` |
+| `tts.mjs <workDir>` | `voices` · `audition <cue> <voice:label>…` · `all [cue…]` |
+| `assemble.py <workDir> [scene…]` | re-mixes the named scenes, always re-concatenates all |
+
+`AUDIO_DIR=<name>` makes `tts.mjs`, the engine and `assemble.py` use `<cache>/<name>/`
+instead of `<cache>/audio/` — handy for comparing two voices without regenerating the other.

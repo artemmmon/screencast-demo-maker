@@ -10,9 +10,9 @@ export default function scenes(stage) {
   const { sleep, record, stop, cue, shot, code, term, web, config, dry } = stage;
   return {
     async s2() {
-      code.open('CLAUDE.md', 1); await sleep(1500);   // pre-roll, before recording
+      code.open('README.md', 1); await sleep(1500);   // pre-roll, before recording
       await record('s2');
-      await cue('s2-01', () => code.open('CLAUDE.md', 7));
+      await cue('s2-01', () => code.open('README.md', 7));
       await stop();
     },
   };
@@ -21,6 +21,9 @@ export default function scenes(stage) {
 
 File scenes first, browser scenes last: Chrome starts once, just before the first
 scene listed in `browser`, and the Terminal window is minimised at that point.
+
+Destructure only what `config.surfaces` stages: a browser-only video uses `web` and never
+touches `code` or `term` (see `examples/minimal-web` in the plugin repo).
 
 ## Recording
 
@@ -39,8 +42,8 @@ Anything outside `record`/`stop` is not filmed: use it for pre-roll and cleanup.
 ## Editor and terminal
 
 ```js
-code.open('server/CLAUDE.md', 12);   // jump in the isolated VS Code
-term.run('cd client && pnpm test');  // type-less command in the staged window
+code.open('src/app.ts', 12);       // jump in the isolated VS Code
+term.run('npm test');              // type-less command in the staged window
 term.front();                        // bring it forward
 term.hide(); term.show();
 ```

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Tiny Tasks</title>
+<style>
+  body { font: 18px/1.5 system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1d2733; }
+  header { padding: 24px 40px; background: #1d2733; color: #fff; }
+  main { max-width: 720px; margin: 32px auto; padding: 0 24px; }
+  li { display: flex; justify-content: space-between; padding: 12px 16px; margin: 8px 0; background: #fff; border-radius: 8px; }
+  .done { color: #2e7d4f; font-weight: 600; }
+  button { font: inherit; padding: 8px 16px; border-radius: 6px; border: 1px solid #1d2733; background: #fff; cursor: pointer; }
+  #details[hidden] { display: none; }
+  #details { margin-top: 16px; padding: 16px; background: #e6eefb; border-radius: 8px; }
+</style>
+<header><h1>Tiny Tasks</h1></header>
+<main>
+  <h2>Today</h2>
+  <ul>
+    <li>Write the demo scenario <span class="done">done</span></li>
+    <li>Check every number on screen <span class="done">done</span></li>
+    <li>Film the video <span>open</span></li>
+  </ul>
+  <button id="toggle" onclick="details.hidden = !details.hidden">Details</button>
+  <div id="details" hidden>2 of 3 tasks done. Filming is the last step.</div>
+</main>
+</html>

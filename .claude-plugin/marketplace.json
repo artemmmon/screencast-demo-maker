@@ -8,7 +8,8 @@
     {
       "name": "screencast-demo-maker",
       "source": "./",
-      "description": "Write a demo scenario, film it as a narrated screencast on macOS, and check the frames against the narration."
+      "description": "Set a project up for demo videos, write a scenario checked against the running app, film it as a narrated screencast on macOS, and check the frames against the narration.",
+      "version": "1.1.0"
     }
   ]
 }

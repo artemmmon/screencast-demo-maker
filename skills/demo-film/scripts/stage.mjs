@@ -5,11 +5,10 @@
 import { chromium } from 'playwright';
 import { spawn, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 
-export const sleep = ms => new Promise(r => setTimeout(r, ms));
-export const cacheDirFor = slug => path.join(os.homedir(), '.cache', 'demo-video', slug);
+import { sleep, cacheDirFor, loadOrExit } from './config.mjs';
+export { sleep, cacheDirFor };
 
 const osa = s => execFileSync('osascript', ['-e', s]).toString().trim();
 const ffprobeDur = f => Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
@@ -26,14 +25,16 @@ const CURSOR = () => {
 };
 
 export async function createStage({ workDir, dry = false }) {
-  const config = JSON.parse(fs.readFileSync(path.join(workDir, 'config.json'), 'utf8'));
+  const config = loadOrExit(workDir);
   const cache = cacheDirFor(config.slug);
-  const machine = JSON.parse(fs.readFileSync(path.join(cache, 'stage.json'), 'utf8'));
+  const stageFile = path.join(cache, 'stage.json');
+  if (!fs.existsSync(stageFile)) throw new Error(`no ${stageFile} — run preflight.mjs first`);
+  const machine = JSON.parse(fs.readFileSync(stageFile, 'utf8'));
   for (const d of ['scenes', 'frames', 'out', 'audio']) fs.mkdirSync(path.join(cache, d), { recursive: true });
 
   const root = config.projectRoot;
-  const fps = config.video?.fps ?? 30;
-  const zoom = config.video?.zoom ?? 1.25;
+  const fps = config.video.fps;
+  const zoom = config.video.zoom;
   const audioDir = path.join(cache, process.env.AUDIO_DIR || 'audio');
   const p_ = f => path.join(cache, f);
 

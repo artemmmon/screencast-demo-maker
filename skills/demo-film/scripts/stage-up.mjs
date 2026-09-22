@@ -2,29 +2,35 @@
 //
 //   node stage-up.mjs <workDir> [--no-code] [--no-term]
 //
+// Only the apps named in config.surfaces are staged ("editor" → VS Code, "terminal" →
+// Terminal.app); the flags skip one more for this run. Chrome is not staged here: the
+// director starts it right before the first browser scene.
+//
 // The VS Code instance is isolated (its own user-data-dir), so your real editor,
 // its tabs and its extensions are never on camera.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { cacheDirFor, sleep } from './stage.mjs';
+import { cacheDirFor, sleep, loadOrExit, uses } from './config.mjs';
 
 const args = process.argv.slice(2);
 const workDir = path.resolve(args.find(a => !a.startsWith('--')) ?? '.');
 const here = path.dirname(new URL(import.meta.url).pathname);
-const config = JSON.parse(fs.readFileSync(path.join(workDir, 'config.json'), 'utf8'));
+const config = loadOrExit(workDir);
 const cache = cacheDirFor(config.slug);
-const machine = JSON.parse(fs.readFileSync(path.join(cache, 'stage.json'), 'utf8'));
+const stageFile = path.join(cache, 'stage.json');
+if (!fs.existsSync(stageFile)) { console.error(`no ${stageFile} — run preflight.mjs first`); process.exit(2); }
+const machine = JSON.parse(fs.readFileSync(stageFile, 'utf8'));
 const d = machine.display;
 const osa = s => execFileSync('osascript', ['-e', s]).toString().trim();
 
-if (!args.includes('--no-code')) {
+if (uses(config, 'editor') && !args.includes('--no-code')) {
   const dataDir = path.join(cache, 'vscode/data');
   fs.mkdirSync(path.join(dataDir, 'User/globalStorage'), { recursive: true });
 
   // Settings: no minimap, no activity bar, one tab, AI/welcome dialogs off, noisy folders hidden.
   const tpl = JSON.parse(fs.readFileSync(path.join(here, '../templates/vscode-settings.json'), 'utf8'));
-  tpl['files.exclude'] = Object.fromEntries((config.vscode?.hide ?? []).map(k => [k, true]));
+  tpl['files.exclude'] = { ...tpl['files.exclude'], ...Object.fromEntries((config.vscode?.hide ?? []).map(k => [k, true])) };
   Object.assign(tpl, config.vscode?.settings ?? {});
   fs.writeFileSync(path.join(dataDir, 'User/settings.json'), JSON.stringify(tpl, null, 2));
 
@@ -46,8 +52,12 @@ if (!args.includes('--no-code')) {
   console.log('VS Code staged');
 }
 
-if (!args.includes('--no-term')) {
-  const init = config.terminal?.init ?? `cd ${config.projectRoot} && clear`;
+if (uses(config, 'terminal') && !args.includes('--no-term')) {
+  // The staged window is a fresh login shell that inherits nothing from this session, so the
+  // default puts the Node running this script first on PATH (Homebrew's node@22 is keg-only).
+  const nodeBin = path.dirname(process.execPath);
+  const init = config.terminal?.init ??
+    `export PATH=${JSON.stringify(nodeBin).slice(1, -1)}:$PATH; cd ${JSON.stringify(config.projectRoot)} && clear`;
   const id = osa(`tell application "Terminal"
   set w to do script ${JSON.stringify(init)}
   delay 0.5

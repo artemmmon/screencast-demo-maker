@@ -6,14 +6,15 @@
 import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { cacheDirFor } from './stage.mjs';
+import { cacheDirFor, loadOrExit, uses } from './config.mjs';
+import { checkMachine, DEFAULT_CODE_BIN } from './doctor.mjs';
 
 const args = process.argv.slice(2);
 const workDir = path.resolve(args.find(a => !a.startsWith('--')) ?? '.');
 const wantId = (args.find(a => a.startsWith('--display-id=')) ?? '').replace('--display-id=', '');
 const here = path.dirname(new URL(import.meta.url).pathname);
 
-const config = JSON.parse(fs.readFileSync(path.join(workDir, 'config.json'), 'utf8'));
+const config = loadOrExit(workDir);
 // Resolution to film at: --display wins, then config.video.display, then the first secondary screen.
 const want = (args.find(a => a.startsWith('--display=')) ?? '').replace('--display=', '') || (config.video?.display ?? '');
 const cache = cacheDirFor(config.slug);
@@ -24,23 +25,13 @@ const note = (good, msg) => (good ? ok : bad).push(msg);
 const run = (cmd, a) => execFileSync(cmd, a, { encoding: 'utf8' }).trim();
 const quiet = (cmd, a) => { try { return run(cmd, a); } catch { return null; } };
 
-// ---------- tools ----------
-for (const [bin, hint] of [['ffmpeg', 'brew install ffmpeg'], ['ffprobe', 'brew install ffmpeg'],
-  ['python3', 'ships with macOS'], ['swift', 'xcode-select --install'], ['screencapture', 'ships with macOS']]) {
-  note(!!quiet('which', [bin]), `${bin}${quiet('which', [bin]) ? '' : ` MISSING — ${hint}`}`);
+// ---------- tools, permissions, TTS key, app health (shared with doctor.mjs) ----------
+for (const c of await checkMachine(config)) (c.ok ? ok : bad).push(c.ok ? c.label : `${c.label} — ${c.fix}`);
+const codeBin = config.codeBin ?? DEFAULT_CODE_BIN;
+if (uses(config, 'editor')) {
+  const len = path.join(cache, 'vscode/data').length;
+  note(len < 80, `cache path length ${len} (VS Code sockets cap at 103)`);
 }
-const nodeMajor = Number(process.versions.node.split('.')[0]);
-note(nodeMajor >= 22, `node ${process.versions.node}${nodeMajor >= 22 ? '' : ' — needs >= 22'}`);
-try { await import('playwright'); ok.push('playwright'); }
-catch { bad.push('playwright MISSING — npm i playwright in the skill scripts dir'); }
-
-const codeBin = config.codeBin ?? '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code';
-note(fs.existsSync(codeBin), `VS Code CLI${fs.existsSync(codeBin) ? '' : ` MISSING at ${codeBin}`}`);
-note(path.join(cache, 'vscode/data').length < 80, `cache path length ${path.join(cache, 'vscode/data').length} (VS Code sockets cap at 103)`);
-
-// ---------- permissions ----------
-const automation = quiet('osascript', ['-e', 'tell application "System Events" to get name of first process']) !== null;
-note(automation, automation ? 'Automation (System Events)' : 'Automation DENIED — System Settings → Privacy → Automation → Terminal');
 
 // ---------- displays ----------
 const displays = run('swift', [path.join(here, 'displays.swift')]).split('\n').filter(Boolean)
@@ -70,19 +61,13 @@ for (const i of indexes) {
     fs.rmSync(f, { force: true });
   } catch { /* device busy or not permitted */ }
 }
-note(indexes.length > 0, indexes.length ? `Screen Recording (capture devices: ${indexes.join(', ')})` : 'Screen Recording DENIED — System Settings → Privacy → Screen Recording → Terminal');
 note(captureIndex !== null, captureIndex !== null ? `capture index ${captureIndex} → ${target.w}x${target.h}` : 'could not map the display to a capture device');
-
-// ---------- app under test ----------
-for (const url of config.healthUrls ?? []) {
-  const code = quiet('curl', ['-s', '-o', '/dev/null', '-w', '%{http_code}', '-m', '5', url]);
-  note(code === '200', `${url} → ${code ?? 'no answer'}`);
-}
 
 // ---------- pointer ----------
 const [px, py] = run('swift', [path.join(here, 'ptr.swift')]).split(/\s+/).map(Number);
 const onTarget = px >= target.x && px < target.x + target.w && py >= target.y && py < target.y + target.h;
-if (onTarget) bad.push(`pointer is ON the filmed display (${px|0},${py|0}) — move it away before filming`);
+if (onTarget && displays.length === 1) ok.push(`one display: park the pointer in a corner before "go" — it will be in frame there`);
+else if (onTarget) bad.push(`pointer is ON the filmed display (${px|0},${py|0}) — move it away before filming`);
 else ok.push(`pointer off the filmed display (${px|0},${py|0})`);
 
 // ---------- write stage.json ----------

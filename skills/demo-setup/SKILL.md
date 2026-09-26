@@ -70,7 +70,10 @@ command and wait. The key procedure is in `../demo-film/reference/elevenlabs-key
    - `projectRoot` relative to `<demoDir>` (e.g. `"../.."`), so the folder works on every clone;
    - `order` = `["s1"]` for now — `demo-scenario` fills it;
    - `surfaces`, `healthUrls`, `web`, `tts.provider`, `tts.language`, `neverClick` from the answers;
-   - `tts.voiceId` empty: the user picks a voice by ear during filming;
+   - `tts.voiceId` empty: the user picks a voice by ear during filming. If they already have
+     their own voice (cloned or from their library), it goes in their personal file
+     `~/.config/screencast-demo-maker/config.json`, never in `config.json`
+     (`../demo-film/reference/files-and-config.md`);
    - drop `vscode` / `terminal` blocks the surfaces do not use.
 2. `.claude/skills/<project>-demo/SKILL.md` from `templates/project-skill.md`. Fill every
    `{{…}}`; delete a section rather than leave a placeholder in it.

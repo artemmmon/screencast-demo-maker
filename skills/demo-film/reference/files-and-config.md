@@ -4,7 +4,7 @@
 
 | File | Written by | What it is |
 |---|---|---|
-| `config.json` | demo-setup (voice added by demo-film) | everything machine- and project-specific |
+| `config.json` | demo-setup (voice added by demo-film) | everything project-specific; per-person overrides live in the personal file |
 | `scenario.md` | demo-scenario | the human view: scenes, what is shown, what is said |
 | `cues.json` | demo-scenario | a **bare JSON array** `[{ "id", "scene", "text" }]`, playback order |
 | `scenes.mjs` | demo-film, phase 2 | the code that drives the screen — see `scenes-api.md` |
@@ -12,6 +12,7 @@
 ## `config.json`
 
 `scripts/config.mjs` validates it; `doctor.mjs <workDir>` prints every problem at once.
+A person's own voice and machine settings go in the personal file (below), not here.
 
 ```jsonc
 {
@@ -50,6 +51,32 @@
   "neverClick": ["Delete"]         // ([]) never clicked by any scene, whatever the video is about
 }
 ```
+
+## The personal file — one person's voice and machine
+
+`~/.config/screencast-demo-maker/config.json` (`$XDG_CONFIG_HOME` is respected;
+`$SCREENCAST_DEMO_USER_CONFIG` names another path). It lives outside every repository and
+overrides the project's `config.json` for that person only, in every project:
+
+```jsonc
+{
+  "tts": {
+    "elevenlabs": { "voiceId": "…", "voiceName": "My voice" },  // voiceId, voiceName, model,
+    "say": { "voiceId": "Lesya", "rate": 170 }                   // voiceSettings, keychainService, rate
+  },
+  "video": { "display": "2560x1440" },
+  "codeBin": "/opt/homebrew/bin/code"
+}
+```
+
+- It wins over `config.json` for these keys and nothing else; any other key is an error,
+  so a typo is caught instead of silently ignored.
+- A `tts` block applies only while its provider is the project's `tts.provider`: a personal
+  ElevenLabs voice never reaches a project narrated with `say`, and vice versa.
+- `doctor.mjs <workDir>` prints the effective voice and every key the file overrode.
+- Put here what only works for, or only suits, this person: a cloned voice or one from
+  their Voice Library, their monitor, their VS Code path. The team's default voice (an
+  ElevenLabs default voice anyone can use) stays in the committed `config.json`.
 
 **Two different orders, on purpose.** `config.order` is the order the finished video
 plays in and is what assembly concatenates. `scenes.mjs`'s exported `order` is the order

@@ -2,7 +2,7 @@
 //
 //   node tts.mjs <workDir> voices
 //   node tts.mjs <workDir> audition <cueId> <voice:label> [...]
-//   node tts.mjs <workDir> all [cueId ...]        # voice/model from config.json
+//   node tts.mjs <workDir> all [cueId ...]        # voice/model from config.json + the personal file
 //
 // config.tts.provider picks the engine:
 //   "elevenlabs" (default) — voice is an ElevenLabs voice id. The API key comes from the
@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { cacheDirFor, loadOrExit } from './config.mjs';
+import { cacheDirFor, loadOrExit, userConfigPath } from './config.mjs';
 
 const [workDirArg, cmd, ...a] = process.argv.slice(2);
 const workDir = path.resolve(workDirArg ?? '.');
@@ -95,7 +95,7 @@ if (cmd === 'voices') {
 
 } else if (cmd === 'all') {
   const voice = config.tts.voiceId;
-  if (!voice) { console.error('config.json has no tts.voiceId — audition voices and let the user pick first'); process.exit(2); }
+  if (!voice) { console.error(`no tts.voiceId in config.json or in ${userConfigPath()} — audition voices and let the user pick first`); process.exit(2); }
   const out = path.join(cache, process.env.AUDIO_DIR || 'audio');
   fs.mkdirSync(path.join(out, 'raw'), { recursive: true });
   const want = a;

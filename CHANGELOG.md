@@ -6,6 +6,21 @@ when `.claude-plugin/plugin.json` `version` changes, so every release bumps it (
 the two agree and creates `screencast-demo-maker--vX.Y.Z`. Bump rule: patch — wording and fixes; minor — new skill, config key or
 script flag; major — a `config.json` or `scenes.mjs` change that breaks existing demos.
 
+## 1.2.0 — 2026-09-26
+
+### Added
+- Personal file `~/.config/screencast-demo-maker/config.json` (`$XDG_CONFIG_HOME`,
+  `$SCREENCAST_DEMO_USER_CONFIG`): one person's voice (`tts.<provider>.voiceId`,
+  `voiceName`, `model`, `voiceSettings`, `keychainService`, `rate`), `video.display` and
+  `codeBin`, laid over every project's `config.json` for that person only. A cloned or
+  Voice Library voice no longer has to be committed, where it broke teammates' narration.
+- `doctor.mjs` prints the effective voice and which keys the personal file overrode, and
+  flags an invalid personal file.
+
+### Changed
+- `demo-film` saves a user's own voice to the personal file and only a team-wide default
+  voice to `config.json`; `demo-setup` and `elevenlabs-key.md` point there.
+
 ## 1.1.0 — 2026-09-22
 
 ### Added

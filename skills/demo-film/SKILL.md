@@ -39,7 +39,7 @@ example to copy from, the URLs to film and the controls never to click.
    - which scenes to film (all, or a re-take list);
    - the display: the doctor reports how many are connected; with one, say that the staged
      windows will cover their screen for the whole take;
-   - the voice, if `tts.voiceId` is empty (auditioned in phase 1);
+   - the voice, if the doctor's `config.json` line says `not chosen yet` (auditioned in phase 1);
    - anything the doctor marked ✗ that only they can fix (permissions, starting the app).
 
 ## Re-shooting one scene
@@ -72,6 +72,7 @@ director's job, not the script's. Run preflight again first if monitors changed.
   or, with a single display, parked in a corner the scenes never use.
 - **What lands in the project:** `scenes.mjs` and the chosen voice in `config.json` (both
   in the demo folder), and the final mp4 at `config.output`. Everything else stays in the cache.
+  A voice that is the user's own goes to their personal file instead (phase 1).
 
 ## Phase 0 — preflight
 
@@ -114,10 +115,17 @@ node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> audition <cueId> <voice:label
 node ${CLAUDE_SKILL_DIR}/scripts/tts.mjs <workDir> all [cueId ...]
 ```
 
-If `config.tts.voiceId` is set, use it. Otherwise audition 3 voices that speak
+The effective voice is `config.json` with the user's personal file
+(`~/.config/screencast-demo-maker/config.json`) laid over it — the doctor prints it and
+what the file overrode. If a voice is set, use it. Otherwise audition 3 voices that speak
 `config.tts.language` on the cue with the most foreign-language terms, `open` the
 audition folder and ask the user to choose — you cannot judge a voice, so never pick
-one silently. Save the winner to `config.json`.
+one silently. Save the winner:
+
+- an ElevenLabs **default** voice meant for the whole team → `config.json`;
+- the user's own voice (cloned, from their Voice Library, or just their preference) →
+  their personal file, `tts.<provider>.voiceId` / `voiceName` (merge, keep other keys);
+  never commit it — it fails on everyone else's account.
 
 `all` trims silence, converts to 48 kHz wav and flags clips whose length is far from
 `chars / tts.charsPerSecond`; re-generate anything flagged.

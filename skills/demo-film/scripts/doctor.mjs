@@ -4,7 +4,8 @@
 //
 // Without a workDir it checks the machine only. With one it also validates config.json and
 // only asks for what that config needs (no VS Code check when `surfaces` has no "editor",
-// no Keychain check for the `say` voice, …). --fix runs the one safe repair: `npm install`
+// no Keychain check for the `say` voice, …) and shows what the personal file overrides
+// (config.mjs → readUserConfig). --fix runs the one safe repair: `npm install`
 // of Playwright into this folder. Exit code: 0 ready, 1 something blocks.
 //
 // preflight.mjs imports checkMachine() from here, so the two never disagree.
@@ -12,7 +13,7 @@ import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readConfig, withDefaults, uses } from './config.mjs';
+import { readConfig, withDefaults, uses, userConfigPath } from './config.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const quiet = (cmd, a) => { try { return execFileSync(cmd, a, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return null; } };
@@ -84,11 +85,15 @@ export async function checkMachine(config = null, { fix = false } = {}) {
 }
 
 export function checkProject(workDir) {
-  const { config, problems } = readConfig(workDir);
-  const out = problems.map(p => ({ ok: false, label: p, fix: `edit ${path.join(workDir, 'config.json')}` }));
+  const { config, user, problems } = readConfig(workDir);
+  const personalFile = userConfigPath();
+  const out = problems.map(p => ({ ok: false, label: p,
+    fix: `edit ${p.startsWith(personalFile) ? personalFile : path.join(workDir, 'config.json')}` }));
   if (!config || problems.length) return { config: null, checks: out };
-  const c = withDefaults(config);
-  out.push({ ok: true, label: `config.json (${c.slug}, surfaces: ${c.surfaces.join(', ')}, voice: ${c.tts.provider})` });
+  const c = withDefaults(config, user);
+  const voice = c.tts.voiceName || c.tts.voiceId || 'not chosen yet';
+  out.push({ ok: true, label: `config.json (${c.slug}, surfaces: ${c.surfaces.join(', ')}, voice: ${c.tts.provider} · ${voice})` });
+  if (c.personal) out.push({ ok: true, label: `personal overrides from ${c.personal.file}: ${c.personal.applied.join(', ')}` });
 
   const cuesFile = path.join(workDir, 'cues.json');
   if (fs.existsSync(cuesFile)) {

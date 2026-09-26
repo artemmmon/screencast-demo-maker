@@ -64,6 +64,21 @@ pasted into chat. The skills check for it before doing anything else and walk yo
    security add-generic-password -s elevenlabs-api -a "$USER" -U -w
    ```
 
+**Your own voice.** A cloned voice or one from your Voice Library works only on your
+account, so keep it out of the repo: put it in your personal file, which overrides any
+project's `config.json` for you alone —
+
+```sh
+mkdir -p ~/.config/screencast-demo-maker
+cat > ~/.config/screencast-demo-maker/config.json <<'JSON'
+{ "tts": { "elevenlabs": { "voiceId": "<your voice id>", "voiceName": "<name>" } } }
+JSON
+```
+
+`node …/doctor.mjs <demo folder>` shows the voice that will be used. The file also takes
+`video.display` and `codeBin` — see
+[`files-and-config.md`](skills/demo-film/reference/files-and-config.md).
+
 Details, rotation and voices across accounts:
 [`skills/demo-film/reference/elevenlabs-key.md`](skills/demo-film/reference/elevenlabs-key.md).
 

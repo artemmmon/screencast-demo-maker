@@ -47,6 +47,11 @@ ElevenLabs' **default** voices (e.g. Eric `cjVigY5qzO86Huf0OWal`). A voice from 
 Library or a cloned voice must be added to each person's own library first; otherwise
 `tts.mjs all` fails with a 4xx for that voice — audition again on that account.
 
+A person's own voice — cloned, or from their Voice Library — goes in their **personal file**
+(`~/.config/screencast-demo-maker/config.json`, `tts.elevenlabs.voiceId`; see
+`files-and-config.md`), never in the committed `config.json`. It then narrates every
+project they film, and teammates keep the committed default.
+
 ## Rotating or removing
 
 ```sh
